@@ -36,6 +36,13 @@
             z-index: 0;
             border: 4px dashed #94a3b8;
         }
+        
+        /* 秘笈卷軸動畫 */
+        @keyframes unfurl {
+            0% { transform: scaleY(0); opacity: 0; }
+            100% { transform: scaleY(1); opacity: 1; }
+        }
+        .animate-unfurl { transform-origin: top; animation: unfurl 0.4s ease-out forwards; }
     </style>
 </head>
 <body>
@@ -49,8 +56,9 @@
         const IconLock = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}><path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clipRule="evenodd" /></svg>;
         const IconCheck = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={className}><polyline points="20 6 9 17 4 12" /></svg>;
         const IconHome = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}><path d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 101.06-1.06l-8.689-8.69a2.25 2.25 0 00-3.182 0l-8.69 8.69a.75.75 0 001.061 1.06l8.69-8.69z" /><path d="M12 5.432l8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H5.625a1.875 1.875 0 01-1.875-1.875v-6.198a2.29 2.29 0 00.091-.086L12 5.43z" /></svg>;
-        const IconSettings = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
+        const IconSettings = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
         const IconBarChart = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>;
+        const IconBook = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}><path d="M11.25 4.533A9.707 9.707 0 006 3a9.735 9.735 0 00-3.25.555.75.75 0 00-.5.707v14.25a.75.75 0 001 .707A8.237 8.237 0 016 18.75c1.995 0 3.823.707 5.25 1.886V4.533zM12.75 20.636A8.214 8.214 0 0118 18.75c.966 0 1.89.166 2.75.477V5.25c0-.655-.45-1.205-1.082-1.327A9.735 9.735 0 0018 3a9.707 9.707 0 00-5.25 1.533v16.103z" /></svg>;
 
         // --- 關卡資料結構 ---
         const LEVELS = [
@@ -63,7 +71,7 @@
                 btnColor: "bg-orange-500",
                 badge: "🍕 分數倍大師",
                 subLevels: [
-                    { id: "1-1", title: "分一分任務", type: "visual-pizza", q: "3 個披薩的 1/4 是多少個披薩？", total: 3, div: 4, ans: "3/4" },
+                    { id: "1-1", title: "分一分任務", type: "visual-pizza", q: "3 個披薩的 1/4 是多少個披薩？", total: 3, div: 4, ans: "3/4", options: ["3/4", "1/4", "4/3", "3"] },
                     { id: "1-2", title: "算一算任務", type: "quiz-basic", q: "5 × 2/3 = ?", options: ["10/3", "7/3", "5/3", "10"], ans: "10/3", hint: "整數只跟分子相乘喔！" },
                     { id: "1-BOSS", title: "村莊守護者", type: "boss", q: "一條繩子長 8 公尺，用掉 3/4，請問用掉幾公尺？", options: ["6公尺", "2公尺", "24/4公尺", "5公尺"], ans: "6公尺", hint: "8 × 3/4 = 24/4 = 6" }
                 ]
@@ -77,7 +85,7 @@
                 btnColor: "bg-blue-500",
                 badge: "🟦 面積王者",
                 subLevels: [
-                    { id: "2-1", title: "塗色訓練", type: "visual-grid", q: "先塗 1/2 (藍)，再塗其中的 1/2 (紅)，重疊處是多少？", r: 1, c: 2, r2: 1, c2: 2, ans: "1/4" },
+                    { id: "2-1", title: "塗色訓練", type: "visual-grid", q: "先塗 1/2 (藍)，再塗其中的 1/2 (紅)，重疊處是多少？", r: 1, c: 2, r2: 1, c2: 2, ans: "1/4", options: ["1/4", "1/2", "3/4", "1"] },
                     { id: "2-2", title: "算式配對", type: "quiz-basic", q: "2/5 × 3/4 的算式意義是？", options: ["2/5 的 3/4 倍", "2/5 加 3/4", "3/4 的 2/5 倍", "以上皆非"], ans: "2/5 的 3/4 倍", hint: "乘號可以看作『的』" },
                     { id: "2-BOSS", title: "城主挑戰", type: "boss", q: "一塊地 4/5 公頃，種花用去其中的 1/2，種花面積是多少公頃？", options: ["2/5", "4/10", "0.4", "以上皆是"], ans: "以上皆是", hint: "4/5 × 1/2 = 4/10 = 2/5 = 0.4" }
                 ]
@@ -105,7 +113,7 @@
                 btnColor: "bg-green-500",
                 badge: "🧃 分配大師",
                 subLevels: [
-                    { id: "4-1", title: "倒果汁任務", type: "visual-juice", q: "4/5 公升果汁，平分給 2 人，每人喝多少？", amount: 4, div: 2, ans: "2/5" },
+                    { id: "4-1", title: "倒果汁任務", type: "visual-juice", q: "4/5 公升果汁，平分給 2 人，每人喝多少？", amount: 4, div: 2, ans: "2/5", options: ["2/5", "4/5", "1/5", "2/10"] },
                     { id: "4-2", title: "算式轉換", type: "quiz-basic", q: "6/7 ÷ 3 可以寫成？", options: ["6/7 × 3", "6/7 × 1/3", "3/7 × 6", "7/6 × 3"], ans: "6/7 × 1/3", hint: "除以整數 = 乘以幾分之一" },
                     { id: "4-BOSS", title: "站長驗收", type: "boss", q: "一條緞帶長 3 又 1/5 公尺，平分剪成 4 段，每段長幾公尺？", options: ["4/5", "16/5", "3/5", "16/20"], ans: "4/5", hint: "先換假分數：16/5 ÷ 4 = 16/5 × 1/4 = 4/5" }
                 ]
@@ -193,6 +201,7 @@
             const [currentSubLevelIndex, setCurrentSubLevelIndex] = useState(0);
             const [tempName, setTempName] = useState('');
             const [showSettings, setShowSettings] = useState(false);
+            const [showSecretBook, setShowSecretBook] = useState(false);
             const [gasUrl, setGasUrl] = useState("https://script.google.com/macros/s/AKfycbxr4w817Y7RjYRDFVKJtJiAdpLZTqWmSpJBHtP-GJqPaqnHj_PKczSkkYJZtM6JJ1E/exec");
 
             // 初始化讀取
@@ -366,6 +375,80 @@
                             </div>
                         </div>
 
+                        {/* 秘笈按鈕 */}
+                        <div className="absolute top-20 right-6 z-20">
+                            <button 
+                                onClick={() => setShowSecretBook(true)}
+                                className="bg-purple-600 text-white p-3 rounded-full shadow-lg hover:bg-purple-700 hover:scale-110 transition flex flex-col items-center gap-1"
+                            >
+                                <IconBook className="w-8 h-8" />
+                                <span className="text-xs font-bold">闖關秘笈</span>
+                            </button>
+                        </div>
+
+                        {/* 秘笈彈窗 */}
+                        {showSecretBook && (
+                            <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => setShowSecretBook(false)}>
+                                <div className="bg-[#fff9c4] w-full max-w-lg rounded-xl shadow-2xl p-8 relative animate-unfurl border-8 border-[#d4a373]" onClick={e => e.stopPropagation()}>
+                                    <button onClick={() => setShowSecretBook(false)} className="absolute top-4 right-4 text-2xl text-amber-800 hover:text-amber-950 font-bold">✕</button>
+                                    
+                                    <h2 className="text-3xl font-bold text-amber-900 text-center mb-6 border-b-2 border-amber-300 pb-2">📜 增加實力卷軸</h2>
+                                    
+                                    <div className="space-y-6 text-amber-900">
+                                        <div className="bg-white/60 p-4 rounded-lg border border-amber-200">
+                                            <h3 className="text-xl font-bold mb-2 flex items-center">✨ 被乘數、乘數與積的關係</h3>
+                                            <p className="text-sm mb-3 text-amber-800">
+                                                當一個數（被乘數）乘以另一個數（乘數）時，積會變大還是變小？
+                                                <br/>
+                                                <span className="font-bold">關鍵看「乘數」是比 1 大還是比 1 小！</span>
+                                            </p>
+                                            
+                                            <div className="space-y-3">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="bg-red-100 text-red-600 font-bold px-2 py-1 rounded">變大</span>
+                                                    <div className="flex-1">
+                                                        <div className="font-bold">乘數 &gt; 1</div>
+                                                        <div className="text-xs text-gray-500">例：5 × <span className="text-red-500 font-bold">1.2</span> = 6 (6 比 5 大)</div>
+                                                    </div>
+                                                    <span className="text-2xl">📈</span>
+                                                </div>
+                                                
+                                                <div className="flex items-center gap-3">
+                                                    <span className="bg-gray-200 text-gray-600 font-bold px-2 py-1 rounded">不變</span>
+                                                    <div className="flex-1">
+                                                        <div className="font-bold">乘數 = 1</div>
+                                                        <div className="text-xs text-gray-500">例：5 × <span className="text-gray-500 font-bold">1</span> = 5</div>
+                                                    </div>
+                                                    <span className="text-2xl">⚖️</span>
+                                                </div>
+
+                                                <div className="flex items-center gap-3">
+                                                    <span className="bg-green-100 text-green-600 font-bold px-2 py-1 rounded">變小</span>
+                                                    <div className="flex-1">
+                                                        <div className="font-bold">乘數 &lt; 1</div>
+                                                        <div className="text-xs text-gray-500">例：5 × <span className="text-green-500 font-bold">0.8</span> = 4 (4 比 5 小)</div>
+                                                    </div>
+                                                    <span className="text-2xl">📉</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-amber-100 p-4 rounded-lg text-center">
+                                            <div className="font-bold text-lg mb-1">📢 超強記憶口訣</div>
+                                            <p className="text-amber-800">
+                                                「乘數<span className="text-red-600 font-bold text-xl">大</span>於 1，積就變<span className="text-red-600 font-bold text-xl">大</span>！」<br/>
+                                                「乘數<span className="text-green-600 font-bold text-xl">小</span>於 1，積就變<span className="text-green-600 font-bold text-xl">小</span>！」
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mt-6 text-center text-sm text-amber-700/60 font-bold">
+                                        - 冒險者公會 製 -
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* 地圖區域 */}
                         <div className="flex-1 relative flex items-center justify-center p-8 overflow-y-auto">
                             <div className="relative w-full max-w-2xl h-[600px] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-[#cffafe] rounded-[50px] shadow-[inset_0_0_60px_rgba(0,0,0,0.1)] border-8 border-white/50 p-10">
@@ -463,44 +546,24 @@
 
                             {/* 選項區 */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                                {(qData.type === 'visual-pizza' || qData.type === 'visual-grid' || qData.type === 'visual-juice') ? (
-                                    // 視覺化題型通常直接給幾個選項或是 input，這裡簡化為選擇題
-                                    ['3/4', '1/4', '4/3', '3'].map((opt, i) => (
-                                        <button 
-                                            key={i}
-                                            onClick={() => {
-                                                const correct = opt === qData.ans;
-                                                if(correct) {
-                                                    alert('✅ 答對了！太棒了！');
-                                                    handleAnswer(true, qData.q, opt, qData.ans);
-                                                } else {
-                                                    alert('❌ 再想一下喔！提示：看圖想一想');
-                                                }
-                                            }}
-                                            className="py-4 rounded-xl border-2 border-gray-200 text-xl font-bold hover:bg-cyan-50 hover:border-cyan-400 transition"
-                                        >
-                                            {opt}
-                                        </button>
-                                    ))
-                                ) : (
-                                    qData.options.map((opt, i) => (
-                                        <button 
-                                            key={i}
-                                            onClick={() => {
-                                                const correct = opt === qData.ans;
-                                                if(correct) {
-                                                    alert('✅ 答對了！');
-                                                    handleAnswer(true, qData.q, opt, qData.ans);
-                                                } else {
-                                                    alert(`❌ 哎呀錯了！\n💡 提示：${qData.hint}`);
-                                                }
-                                            }}
-                                            className={`py-4 rounded-xl border-b-4 text-xl font-bold transition active:border-b-0 active:translate-y-1 ${levelData.color.replace('bg-', 'hover:bg-').replace('border-', 'hover:border-')} bg-white border-gray-300`}
-                                        >
-                                            {opt}
-                                        </button>
-                                    ))
-                                )}
+                                {/* 修改處：移除寫死的選項，改用 qData.options */}
+                                {qData.options && qData.options.map((opt, i) => (
+                                    <button 
+                                        key={i}
+                                        onClick={() => {
+                                            const correct = opt === qData.ans;
+                                            if(correct) {
+                                                alert('✅ 答對了！太棒了！');
+                                                handleAnswer(true, qData.q, opt, qData.ans);
+                                            } else {
+                                                alert(`❌ 哎呀錯了！${qData.hint ? '\n💡 提示：' + qData.hint : ''}`);
+                                            }
+                                        }}
+                                        className={`py-4 rounded-xl border-b-4 text-xl font-bold transition active:border-b-0 active:translate-y-1 ${levelData.color.replace('bg-', 'hover:bg-').replace('border-', 'hover:border-')} bg-white border-gray-300`}
+                                    >
+                                        {opt}
+                                    </button>
+                                ))}
                             </div>
                         </div>
                     </div>
