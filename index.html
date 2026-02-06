@@ -1,620 +1,192 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>分數冒險島：分數的計算</title>
-    <!-- 引入 Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 React 和 Babel -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
-    
-    <style>
-        body { font-family: 'Zen Maru Gothic', sans-serif; background-color: #ecfeff; }
-        .font-game { font-family: 'Fredoka', sans-serif; }
-        
-        /* 遊戲化動畫 */
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        .animate-float { animation: float 3s ease-in-out infinite; }
-        
-        @keyframes pop {
-            0% { transform: scale(0.8); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .animate-pop { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>分數冒險島：分數的計算</title>
 
-        /* 地圖路徑線條 */
-        .map-path {
-            position: absolute;
-            z-index: 0;
-            border: 4px dashed #94a3b8;
-        }
-        
-        /* 秘笈卷軸動畫 */
-        @keyframes unfurl {
-            0% { transform: scaleY(0); opacity: 0; }
-            100% { transform: scaleY(1); opacity: 1; }
-        }
-        .animate-unfurl { transform-origin: top; animation: unfurl 0.4s ease-out forwards; }
-    </style>
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- React -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Zen Maru Gothic', sans-serif; background-color: #ecfeff; }
+    .font-game { font-family: 'Fredoka', sans-serif; }
+  </style>
 </head>
+
 <body>
-    <div id="root"></div>
+<div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+<script type="text/babel">
 
-        // --- 圖示 (Icons) ---
-        const IconStar = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}><path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" /></svg>;
-        const IconLock = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}><path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clipRule="evenodd" /></svg>;
-        const IconCheck = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={className}><polyline points="20 6 9 17 4 12" /></svg>;
-        const IconHome = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}><path d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 101.06-1.06l-8.689-8.69a2.25 2.25 0 00-3.182 0l-8.69 8.69a.75.75 0 001.061 1.06l8.69-8.69z" /><path d="M12 5.432l8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H5.625a1.875 1.875 0 01-1.875-1.875v-6.198a2.29 2.29 0 00.091-.086L12 5.43z" /></svg>;
-        const IconSettings = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
-        const IconBarChart = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>;
-        const IconBook = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}><path d="M11.25 4.533A9.707 9.707 0 006 3a9.735 9.735 0 00-3.25.555.75.75 0 00-.5.707v14.25a.75.75 0 001 .707A8.237 8.237 0 016 18.75c1.995 0 3.823.707 5.25 1.886V4.533zM12.75 20.636A8.214 8.214 0 0118 18.75c.966 0 1.89.166 2.75.477V5.25c0-.655-.45-1.205-1.082-1.327A9.735 9.735 0 0018 3a9.707 9.707 0 00-5.25 1.533v16.103z" /></svg>;
+const { useState, useEffect } = React;
 
-        // --- 關卡資料結構 ---
-        const LEVELS = [
-            {
-                id: 1,
-                name: "整數 × 分數村",
-                desc: "學習將整數乘以分數，像是分披薩一樣簡單！",
-                icon: "🍕",
-                color: "bg-orange-100 border-orange-400",
-                btnColor: "bg-orange-500",
-                badge: "🍕 分數倍大師",
-                subLevels: [
-                    { id: "1-1", title: "分一分任務", type: "visual-pizza", q: "3 個披薩的 1/4 是多少個披薩？", total: 3, div: 4, ans: "3/4", options: ["3/4", "1/4", "4/3", "3"] },
-                    { id: "1-2", title: "算一算任務", type: "quiz-basic", q: "5 × 2/3 = ?", options: ["10/3", "7/3", "5/3", "10"], ans: "10/3", hint: "整數只跟分子相乘喔！" },
-                    { id: "1-BOSS", title: "村莊守護者", type: "boss", q: "一條繩子長 8 公尺，用掉 3/4，請問用掉幾公尺？", options: ["6公尺", "2公尺", "24/4公尺", "5公尺"], ans: "6公尺", hint: "8 × 3/4 = 24/4 = 6" }
-                ]
-            },
-            {
-                id: 2,
-                name: "分數 × 分數方格城",
-                desc: "進入方格城，用面積圖解分數乘法！",
-                icon: "🟦",
-                color: "bg-blue-100 border-blue-400",
-                btnColor: "bg-blue-500",
-                badge: "🟦 面積王者",
-                subLevels: [
-                    { id: "2-1", title: "塗色訓練", type: "visual-grid", q: "先塗 1/2 (藍)，再塗其中的 1/2 (紅)，重疊處是多少？", r: 1, c: 2, r2: 1, c2: 2, ans: "1/4", options: ["1/4", "1/2", "3/4", "1"] },
-                    { id: "2-2", title: "算式配對", type: "quiz-basic", q: "2/5 × 3/4 的算式意義是？", options: ["2/5 的 3/4 倍", "2/5 加 3/4", "3/4 的 2/5 倍", "以上皆非"], ans: "2/5 的 3/4 倍", hint: "乘號可以看作『的』" },
-                    { id: "2-BOSS", title: "城主挑戰", type: "boss", q: "一塊地 4/5 公頃，種花用去其中的 1/2，種花面積是多少公頃？", options: ["2/5", "4/10", "0.4", "以上皆是"], ans: "以上皆是", hint: "4/5 × 1/2 = 4/10 = 2/5 = 0.4" }
-                ]
-            },
-            {
-                id: 3,
-                name: "大小判斷研究所",
-                desc: "不用算也能知道答案變大還是變小！",
-                icon: "🔍",
-                color: "bg-purple-100 border-purple-400",
-                btnColor: "bg-purple-500",
-                badge: "🔍 先知徽章",
-                subLevels: [
-                    { id: "3-1", title: "快閃判斷", type: "logic-compare", q: "10 × 2/3", base: 10, mult: 2/3, options: ["變大", "變小", "不變"], ans: "變小" },
-                    { id: "3-2", title: "陷阱題", type: "logic-compare", q: "5/6 × 8/7", base: 5/6, mult: 8/7, options: ["比 5/6 大", "比 5/6 小", "一樣大"], ans: "比 5/6 大" },
-                    { id: "3-BOSS", title: "所長考核", type: "boss", q: "下列哪個算式的積 比被乘數大？", options: ["3/4 × 1/2", "3/4 × 1", "3/4 × 4/3", "3/4 × 0.9"], ans: "3/4 × 4/3", hint: "乘數大於 1，積才會變大！" }
-                ]
-            },
-            {
-                id: 4,
-                name: "分數 ÷ 整數分配站",
-                desc: "學會公平分配，把果汁分給大家！",
-                icon: "🧃",
-                color: "bg-green-100 border-green-400",
-                btnColor: "bg-green-500",
-                badge: "🧃 分配大師",
-                subLevels: [
-                    { id: "4-1", title: "倒果汁任務", type: "visual-juice", q: "4/5 公升果汁，平分給 2 人，每人喝多少？", amount: 4, div: 2, ans: "2/5", options: ["2/5", "4/5", "1/5", "2/10"] },
-                    { id: "4-2", title: "算式轉換", type: "quiz-basic", q: "6/7 ÷ 3 可以寫成？", options: ["6/7 × 3", "6/7 × 1/3", "3/7 × 6", "7/6 × 3"], ans: "6/7 × 1/3", hint: "除以整數 = 乘以幾分之一" },
-                    { id: "4-BOSS", title: "站長驗收", type: "boss", q: "一條緞帶長 3 又 1/5 公尺，平分剪成 4 段，每段長幾公尺？", options: ["4/5", "16/5", "3/5", "16/20"], ans: "4/5", hint: "先換假分數：16/5 ÷ 4 = 16/5 × 1/4 = 4/5" }
-                ]
-            }
-        ];
+/* ===============================
+   第 2 單元｜影片學習資料
+================================ */
+const VIDEO_LESSONS_UNIT2 = [
+  {
+    title: "【概念】整數除以 2 與 整數乘以 1/2",
+    url: "https://www.youtube.com/embed/UPUmjWD898k",
+    quiz: {
+      q: "8 × 1/2 的結果是？",
+      options: ["4", "8", "16", "1/4"],
+      ans: "4"
+    }
+  },
+  {
+    title: "【例題】整數乘以分數",
+    url: "https://www.youtube.com/embed/mCkjP87aYQ0",
+    quiz: {
+      q: "5 × 2/3 的正確答案是？",
+      options: ["10/3", "7/3", "5/3", "10"],
+      ans: "10/3"
+    }
+  },
+  {
+    title: "【例題】分數乘以分數（生活例子）",
+    url: "https://www.youtube.com/embed/rGWLf_LIm9E",
+    quiz: {
+      q: "1/2 的 1/3 是多少？",
+      options: ["1/6", "1/5", "2/3", "1/2"],
+      ans: "1/6"
+    }
+  }
+];
 
-        // --- 視覺化組件 ---
+/* ===============================
+   影片學習站元件
+================================ */
+const VideoLearningStation = ({ videos, onLog }) => (
+  <div className="mt-12 space-y-8">
+    <h3 className="text-2xl font-bold text-blue-700 text-center">
+      🎬 整數與分數乘法運算影片學習
+    </h3>
 
-        // 1. 披薩視覺化
-        const PizzaVisual = ({ total, div }) => {
-            return (
-                <div className="flex flex-wrap justify-center gap-4 py-6">
-                    {Array.from({ length: total }).map((_, i) => (
-                        <div key={i} className="relative w-24 h-24 bg-yellow-200 rounded-full border-4 border-yellow-500 overflow-hidden shadow-lg animate-pop" style={{animationDelay: `${i*0.1}s`}}>
-                            <div className="absolute inset-0 border-r-2 border-yellow-600" style={{left: '50%'}}></div>
-                            <div className="absolute inset-0 border-b-2 border-yellow-600" style={{top: '50%'}}></div>
-                            {/* Highlight 1 slice */}
-                            <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-red-400 opacity-60 rounded-tr-full"></div>
-                        </div>
-                    ))}
-                    <div className="w-full text-center text-lg text-orange-700 font-bold mt-2">
-                        {total} 個披薩，每個切成 4 份，取其中 1 份<br/>
-                        共取了 {total} 個 1/4 = {total}/4
-                    </div>
-                </div>
-            );
-        };
+    {videos.map((v, i) => (
+      <div key={i} className="bg-white rounded-2xl p-4 shadow border">
+        <h4 className="font-bold mb-2">{v.title}</h4>
 
-        // 2. 方格視覺化
-        const GridVisual = () => {
-            return (
-                <div className="flex flex-col items-center py-6">
-                    <div className="relative w-48 h-48 border-4 border-gray-800 bg-white grid grid-cols-2 grid-rows-2">
-                        {/* 1/2 藍色直條 */}
-                        <div className="absolute left-0 top-0 bottom-0 w-1/2 bg-blue-300 opacity-50"></div>
-                        {/* 1/2 紅色橫條 (只在藍色區域內有效，模擬分數乘分數) */}
-                        <div className="absolute left-0 top-0 right-0 h-1/2 bg-red-300 opacity-50"></div>
-                        
-                        {/* 網格線 */}
-                        <div className="border border-gray-300 w-full h-full"></div>
-                        <div className="border border-gray-300 w-full h-full"></div>
-                        <div className="border border-gray-300 w-full h-full"></div>
-                        <div className="border border-gray-300 w-full h-full"></div>
-                        
-                        {/* 重疊區強調 */}
-                        <div className="absolute left-0 top-0 w-1/2 h-1/2 bg-purple-500 opacity-60 flex items-center justify-center text-white font-bold text-xl animate-pulse">
-                            ?
-                        </div>
-                    </div>
-                    <p className="mt-4 text-gray-600">藍色是 1/2，紅色是藍色的 1/2</p>
-                </div>
-            );
-        };
+        <iframe
+          className="w-full aspect-video rounded-lg mb-4"
+          src={v.url}
+          allowFullScreen
+          onLoad={() => onLog("video_view", v.title)}
+        ></iframe>
 
-        // 3. 果汁視覺化
-        const JuiceVisual = ({ amount, div }) => {
-            return (
-                <div className="flex flex-col items-center py-6">
-                    <div className="relative w-32 h-48 border-x-4 border-b-4 border-gray-400 rounded-b-xl bg-white overflow-hidden mb-4">
-                        <div className="absolute bottom-0 w-full bg-green-400 transition-all duration-1000" style={{ height: `${(amount/5)*100}%` }}></div>
-                        <div className="absolute w-full border-t border-gray-300 top-1/5 text-xs text-right pr-1">4/5</div>
-                        <div className="absolute w-full border-t border-gray-300 top-2/5 text-xs text-right pr-1">3/5</div>
-                        <div className="absolute w-full border-t border-gray-300 top-3/5 text-xs text-right pr-1">2/5</div>
-                        <div className="absolute w-full border-t border-gray-300 top-4/5 text-xs text-right pr-1">1/5</div>
-                    </div>
-                    <div className="text-2xl font-bold mb-2">÷ {div}</div>
-                    <div className="flex gap-4">
-                        <div className="w-16 h-24 border-x-2 border-b-2 border-gray-400 rounded-b-lg relative overflow-hidden">
-                             <div className="absolute bottom-0 w-full bg-green-400 h-2/5 opacity-50"></div>
-                        </div>
-                        <div className="w-16 h-24 border-x-2 border-b-2 border-gray-400 rounded-b-lg relative overflow-hidden">
-                             <div className="absolute bottom-0 w-full bg-green-400 h-2/5 opacity-50"></div>
-                        </div>
-                    </div>
-                </div>
-            );
-        };
+        <p className="font-bold mb-2">📝 小練習：{v.quiz.q}</p>
 
-        // --- 主要組件 ---
+        <div className="grid grid-cols-2 gap-2">
+          {v.quiz.options.map((opt, idx) => (
+            <button
+              key={idx}
+              className="bg-gray-100 hover:bg-blue-100 rounded-lg p-2"
+              onClick={() =>
+                onLog(
+                  "video_quiz",
+                  v.title,
+                  v.quiz.q,
+                  opt,
+                  opt === v.quiz.ans
+                )
+              }
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+);
 
-        function App() {
-            const [screen, setScreen] = useState('welcome'); // welcome, map, level, report
-            const [userData, setUserData] = useState({ name: '', unlocked: 1, coins: 0, badges: [], history: [] });
-            const [currentLevelId, setCurrentLevelId] = useState(null);
-            const [currentSubLevelIndex, setCurrentSubLevelIndex] = useState(0);
-            const [tempName, setTempName] = useState('');
-            const [showSettings, setShowSettings] = useState(false);
-            const [showSecretBook, setShowSecretBook] = useState(false);
-            const [gasUrl, setGasUrl] = useState("https://script.google.com/macros/s/AKfycbxr4w817Y7RjYRDFVKJtJiAdpLZTqWmSpJBHtP-GJqPaqnHj_PKczSkkYJZtM6JJ1E/exec");
+/* ===============================
+   主程式
+================================ */
+function App() {
+  const [name, setName] = useState("");
+  const [started, setStarted] = useState(false);
+  const [gasUrl, setGasUrl] = useState(
+    localStorage.getItem("fractionAdventureGasUrl") ||
+    "https://script.google.com/macros/s/AKfycbxr4w817Y7RjYRDFVKJtJiAdpLZTqWmSpJBHtP-GJqPaqnHj_PKczSkkYJZtM6JJ1E/exec"
+  );
 
-            // 初始化讀取
-            useEffect(() => {
-                const saved = localStorage.getItem('fractionAdventureUser');
-                if (saved) setUserData(JSON.parse(saved));
-                const savedUrl = localStorage.getItem('fractionAdventureGasUrl');
-                if (savedUrl) setGasUrl(savedUrl);
-            }, []);
+  const logLearning = async (type, videoTitle, q="", ans="", correct="") => {
+    if (!gasUrl) return;
 
-            // 存檔
-            const saveData = (newData) => {
-                const updated = { ...userData, ...newData };
-                setUserData(updated);
-                localStorage.setItem('fractionAdventureUser', JSON.stringify(updated));
-            };
+    const payload = {
+      name,
+      unit: "第2單元 分數冒險島",
+      type,
+      video: videoTitle,
+      question: q,
+      answer: ans,
+      correct,
+      time: new Date().toLocaleString()
+    };
 
-            const startApp = () => {
-                if (!tempName.trim()) return;
-                saveData({ name: tempName });
-                setScreen('map');
-            };
+    fetch(gasUrl, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+  };
 
-            // 進入關卡
-            const enterLevel = (levelId) => {
-                if (levelId > userData.unlocked) return;
-                setCurrentLevelId(levelId);
-                setCurrentSubLevelIndex(0);
-                setScreen('level');
-            };
+  if (!started) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-white p-8 rounded-2xl shadow-xl text-center w-80">
+          <h1 className="text-3xl font-bold mb-4">🏝️ 分數冒險島</h1>
+          <input
+            className="border p-2 w-full mb-4 text-center"
+            placeholder="輸入冒險者姓名"
+            value={name}
+            onChange={e => setName(e.target.value)}
+          />
+          <button
+            className="bg-yellow-400 px-4 py-2 rounded-lg font-bold"
+            onClick={() => setStarted(true)}
+          >
+            開始學習
+          </button>
 
-            // 處理答題
-            const handleAnswer = (isCorrect, questionText, userAnswer, correctAnswer) => {
-                // 記錄
-                const newRecord = {
-                    time: new Date().toLocaleString(),
-                    level: `${currentLevelId}-${currentSubLevelIndex+1}`,
-                    q: questionText,
-                    userAns: userAnswer,
-                    isCorrect: isCorrect
-                };
-                
-                const updatedHistory = [newRecord, ...userData.history];
-                let updatedCoins = userData.coins;
-                
-                if (isCorrect) updatedCoins += 10;
+          <input
+            className="border p-1 text-xs mt-4 w-full"
+            value={gasUrl}
+            onChange={e => {
+              setGasUrl(e.target.value);
+              localStorage.setItem("fractionAdventureGasUrl", e.target.value);
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
 
-                saveData({ history: updatedHistory, coins: updatedCoins });
+  return (
+    <div className="min-h-screen p-6 max-w-4xl mx-auto">
+      <h2 className="text-3xl font-bold mb-6 text-center">
+        第 2 單元｜分數冒險島
+      </h2>
 
-                if (isCorrect) {
-                    // 下一小關
-                    const currentLevelData = LEVELS.find(l => l.id === currentLevelId);
-                    if (currentSubLevelIndex < currentLevelData.subLevels.length - 1) {
-                        setTimeout(() => setCurrentSubLevelIndex(p => p + 1), 1000);
-                    } else {
-                        // 通關該大關卡
-                        completeLevel(currentLevelId);
-                    }
-                }
-            };
+      <VideoLearningStation
+        videos={VIDEO_LESSONS_UNIT2}
+        onLog={logLearning}
+      />
+    </div>
+  );
+}
 
-            const completeLevel = (levelId) => {
-                const levelData = LEVELS.find(l => l.id === levelId);
-                let newUnlocked = userData.unlocked;
-                let newBadges = [...userData.badges];
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 
-                // 解鎖下一關
-                if (levelId === userData.unlocked && levelId < 4) {
-                    newUnlocked = levelId + 1;
-                }
-                
-                // 獲得徽章
-                if (!newBadges.includes(levelData.badge)) {
-                    newBadges.push(levelData.badge);
-                }
-
-                saveData({ unlocked: newUnlocked, badges: newBadges, coins: userData.coins + 50 }); // Boss bonus
-                setTimeout(() => {
-                    alert(`🎉 恭喜通關！獲得徽章：${levelData.badge}\n解鎖下一區域！`);
-                    setScreen('map');
-                }, 1000);
-            };
-
-            // 上傳 GAS
-            const submitToGAS = async () => {
-                if (!gasUrl) return;
-                const payload = {
-                    name: userData.name,
-                    score: userData.coins, // 這裡用金幣當分數
-                    correctCount: userData.badges.length, // 用徽章數當答對指標(示意)
-                    totalCount: 4,
-                    details: `[分數冒險島] 已解鎖至第 ${userData.unlocked} 關, 徽章: ${userData.badges.join(',')}`
-                };
-
-                try {
-                    await fetch(gasUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    alert('✅ 冒險進度已上傳給老師！');
-                } catch (e) {
-                    alert('❌ 上傳失敗，請檢查網路。');
-                }
-            };
-
-            // --- 畫面渲染 ---
-
-            // 1. 歡迎畫面
-            if (screen === 'welcome') {
-                return (
-                    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cyan-300 to-blue-500 p-4">
-                        <div className="bg-white rounded-3xl p-10 max-w-md w-full shadow-2xl text-center border-4 border-white/50 relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-full h-4 bg-yellow-400"></div>
-                            <div className="text-6xl mb-4 animate-float">🏝️</div>
-                            <h1 className="text-4xl font-game font-bold text-cyan-700 mb-2">分數冒險島</h1>
-                            <p className="text-gray-500 mb-8">Fraction Island Adventure</p>
-                            
-                            <input
-                                type="text"
-                                placeholder="輸入冒險者姓名"
-                                className="w-full p-4 bg-gray-100 rounded-xl mb-4 text-center text-xl outline-none focus:ring-4 ring-cyan-200 transition"
-                                value={tempName}
-                                onChange={e => setTempName(e.target.value)}
-                            />
-                            
-                            <button onClick={startApp} className="w-full py-4 bg-yellow-400 text-yellow-900 rounded-xl font-bold text-2xl shadow-lg hover:bg-yellow-300 hover:scale-105 transition transform">
-                                開始冒險 ▶
-                            </button>
-
-                            <div className="mt-6 text-sm text-gray-400 cursor-pointer hover:text-cyan-600" onClick={() => setShowSettings(!showSettings)}>
-                                <IconSettings className="inline w-4 h-4 mr-1"/> 設定
-                            </div>
-                            {showSettings && (
-                                <input 
-                                    type="text" 
-                                    className="w-full mt-2 p-2 border text-xs" 
-                                    value={gasUrl} 
-                                    onChange={e => {setGasUrl(e.target.value); localStorage.setItem('fractionAdventureGasUrl', e.target.value)}}
-                                />
-                            )}
-                        </div>
-                    </div>
-                );
-            }
-
-            // 2. 地圖畫面
-            if (screen === 'map') {
-                return (
-                    <div className="min-h-screen bg-[#a5f3fc] relative overflow-hidden flex flex-col">
-                        {/* 頂部資訊欄 */}
-                        <div className="bg-white/90 backdrop-blur p-4 flex justify-between items-center shadow-md z-10">
-                            <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                                    {userData.name[0]}
-                                </div>
-                                <div>
-                                    <div className="font-bold text-gray-800">{userData.name}</div>
-                                    <div className="text-xs text-gray-500">Lv. {userData.unlocked} 探險家</div>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-1 bg-yellow-100 px-3 py-1 rounded-full border border-yellow-300">
-                                    <div className="text-yellow-600">⭐</div>
-                                    <span className="font-bold text-yellow-700">{userData.coins}</span>
-                                </div>
-                                <button onClick={() => setScreen('report')} className="bg-gray-100 p-2 rounded-full hover:bg-gray-200">
-                                    <IconBarChart className="w-6 h-6 text-gray-600" />
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* 秘笈按鈕 */}
-                        <div className="absolute top-20 right-6 z-20">
-                            <button 
-                                onClick={() => setShowSecretBook(true)}
-                                className="bg-purple-600 text-white p-3 rounded-full shadow-lg hover:bg-purple-700 hover:scale-110 transition flex flex-col items-center gap-1"
-                            >
-                                <IconBook className="w-8 h-8" />
-                                <span className="text-xs font-bold">闖關秘笈</span>
-                            </button>
-                        </div>
-
-                        {/* 秘笈彈窗 */}
-                        {showSecretBook && (
-                            <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => setShowSecretBook(false)}>
-                                <div className="bg-[#fff9c4] w-full max-w-lg rounded-xl shadow-2xl p-8 relative animate-unfurl border-8 border-[#d4a373]" onClick={e => e.stopPropagation()}>
-                                    <button onClick={() => setShowSecretBook(false)} className="absolute top-4 right-4 text-2xl text-amber-800 hover:text-amber-950 font-bold">✕</button>
-                                    
-                                    <h2 className="text-3xl font-bold text-amber-900 text-center mb-6 border-b-2 border-amber-300 pb-2">📜 增加實力卷軸</h2>
-                                    
-                                    <div className="space-y-6 text-amber-900">
-                                        <div className="bg-white/60 p-4 rounded-lg border border-amber-200">
-                                            <h3 className="text-xl font-bold mb-2 flex items-center">✨ 被乘數、乘數與積的關係</h3>
-                                            <p className="text-sm mb-3 text-amber-800">
-                                                當一個數（被乘數）乘以另一個數（乘數）時，積會變大還是變小？
-                                                <br/>
-                                                <span className="font-bold">關鍵看「乘數」是比 1 大還是比 1 小！</span>
-                                            </p>
-                                            
-                                            <div className="space-y-3">
-                                                <div className="flex items-center gap-3">
-                                                    <span className="bg-red-100 text-red-600 font-bold px-2 py-1 rounded">變大</span>
-                                                    <div className="flex-1">
-                                                        <div className="font-bold">乘數 &gt; 1</div>
-                                                        <div className="text-xs text-gray-500">例：5 × <span className="text-red-500 font-bold">1.2</span> = 6 (6 比 5 大)</div>
-                                                    </div>
-                                                    <span className="text-2xl">📈</span>
-                                                </div>
-                                                
-                                                <div className="flex items-center gap-3">
-                                                    <span className="bg-gray-200 text-gray-600 font-bold px-2 py-1 rounded">不變</span>
-                                                    <div className="flex-1">
-                                                        <div className="font-bold">乘數 = 1</div>
-                                                        <div className="text-xs text-gray-500">例：5 × <span className="text-gray-500 font-bold">1</span> = 5</div>
-                                                    </div>
-                                                    <span className="text-2xl">⚖️</span>
-                                                </div>
-
-                                                <div className="flex items-center gap-3">
-                                                    <span className="bg-green-100 text-green-600 font-bold px-2 py-1 rounded">變小</span>
-                                                    <div className="flex-1">
-                                                        <div className="font-bold">乘數 &lt; 1</div>
-                                                        <div className="text-xs text-gray-500">例：5 × <span className="text-green-500 font-bold">0.8</span> = 4 (4 比 5 小)</div>
-                                                    </div>
-                                                    <span className="text-2xl">📉</span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-amber-100 p-4 rounded-lg text-center">
-                                            <div className="font-bold text-lg mb-1">📢 超強記憶口訣</div>
-                                            <p className="text-amber-800">
-                                                「乘數<span className="text-red-600 font-bold text-xl">大</span>於 1，積就變<span className="text-red-600 font-bold text-xl">大</span>！」<br/>
-                                                「乘數<span className="text-green-600 font-bold text-xl">小</span>於 1，積就變<span className="text-green-600 font-bold text-xl">小</span>！」
-                                            </p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="mt-6 text-center text-sm text-amber-700/60 font-bold">
-                                        - 冒險者公會 製 -
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* 地圖區域 */}
-                        <div className="flex-1 relative flex items-center justify-center p-8 overflow-y-auto">
-                            <div className="relative w-full max-w-2xl h-[600px] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-[#cffafe] rounded-[50px] shadow-[inset_0_0_60px_rgba(0,0,0,0.1)] border-8 border-white/50 p-10">
-                                {/* 裝飾背景 */}
-                                <div className="absolute top-10 left-10 text-6xl opacity-20 animate-float">☁️</div>
-                                <div className="absolute bottom-20 right-20 text-6xl opacity-20 animate-float" style={{animationDelay:'1s'}}>☁️</div>
-
-                                {/* 關卡路徑 */}
-                                <div className="absolute left-1/2 top-20 bottom-20 w-1 border-l-4 border-dashed border-cyan-400/50 -translate-x-1/2"></div>
-
-                                <div className="flex flex-col gap-12 items-center relative z-10 h-full justify-between">
-                                    {LEVELS.map((level, idx) => {
-                                        const isUnlocked = level.id <= userData.unlocked;
-                                        const isCompleted = level.id < userData.unlocked;
-                                        
-                                        return (
-                                            <button 
-                                                key={level.id}
-                                                onClick={() => enterLevel(level.id)}
-                                                disabled={!isUnlocked}
-                                                className={`
-                                                    relative w-full max-w-md p-4 rounded-2xl flex items-center gap-4 transition-all duration-300 border-b-8 group
-                                                    ${isUnlocked 
-                                                        ? `${level.color} hover:scale-105 active:scale-95 active:border-b-0 active:translate-y-2 cursor-pointer shadow-lg` 
-                                                        : 'bg-gray-200 border-gray-400 opacity-70 cursor-not-allowed grayscale'}
-                                                `}
-                                            >
-                                                <div className={`w-16 h-16 rounded-xl flex items-center justify-center text-3xl shadow-inner ${isUnlocked ? 'bg-white' : 'bg-gray-300'}`}>
-                                                    {isUnlocked ? level.icon : <IconLock className="w-8 h-8 text-gray-500"/>}
-                                                </div>
-                                                <div className="flex-1 text-left">
-                                                    <h3 className="font-bold text-xl text-gray-800">{level.name}</h3>
-                                                    <p className="text-sm text-gray-600">{level.desc}</p>
-                                                </div>
-                                                {isCompleted && (
-                                                    <div className="bg-green-500 text-white p-1 rounded-full">
-                                                        <IconCheck className="w-6 h-6" />
-                                                    </div>
-                                                )}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-            }
-
-            // 3. 關卡畫面
-            if (screen === 'level') {
-                const levelData = LEVELS.find(l => l.id === currentLevelId);
-                const qData = levelData.subLevels[currentSubLevelIndex];
-                const isBoss = qData.type === 'boss';
-
-                return (
-                    <div className={`min-h-screen flex flex-col ${isBoss ? 'bg-red-50' : 'bg-white'}`}>
-                        {/* Header */}
-                        <div className="p-4 flex justify-between items-center border-b-2 border-gray-100">
-                            <button onClick={() => setScreen('map')} className="text-gray-500 hover:bg-gray-100 px-3 py-1 rounded-lg flex items-center gap-1">
-                                <IconHome className="w-5 h-5"/> 離開
-                            </button>
-                            <div className="font-bold text-lg text-gray-700">
-                                關卡 {currentLevelId}-{currentSubLevelIndex + 1}：{qData.title}
-                            </div>
-                            <div className="w-16"></div>
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 flex flex-col items-center justify-center p-6 max-w-3xl mx-auto w-full">
-                            {isBoss && <div className="text-red-500 font-bold text-2xl mb-4 animate-bounce">🔥 BOSS 挑戰 🔥</div>}
-                            
-                            <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center leading-relaxed">
-                                {qData.q}
-                            </h2>
-
-                            {/* 視覺化區域 */}
-                            <div className="w-full mb-8 min-h-[150px] flex justify-center bg-gray-50 rounded-2xl p-4 border border-gray-200">
-                                {qData.type === 'visual-pizza' && <PizzaVisual total={qData.total} div={qData.div} />}
-                                {qData.type === 'visual-grid' && <GridVisual />}
-                                {qData.type === 'visual-juice' && <JuiceVisual amount={qData.amount} div={qData.div} />}
-                                {qData.type === 'logic-compare' && (
-                                    <div className="text-6xl font-bold text-purple-600 flex gap-4 items-center">
-                                        <span>{qData.base}</span> 
-                                        <span className="text-gray-400">×</span> 
-                                        <span>{qData.mult.toFixed(2)}</span>
-                                    </div>
-                                )}
-                                {(qData.type === 'quiz-basic' || isBoss) && (
-                                    <div className="text-gray-400 flex items-center justify-center h-full">
-                                        請直接作答 👇
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* 選項區 */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                                {/* 修改處：移除寫死的選項，改用 qData.options */}
-                                {qData.options && qData.options.map((opt, i) => (
-                                    <button 
-                                        key={i}
-                                        onClick={() => {
-                                            const correct = opt === qData.ans;
-                                            if(correct) {
-                                                alert('✅ 答對了！太棒了！');
-                                                handleAnswer(true, qData.q, opt, qData.ans);
-                                            } else {
-                                                alert(`❌ 哎呀錯了！${qData.hint ? '\n💡 提示：' + qData.hint : ''}`);
-                                            }
-                                        }}
-                                        className={`py-4 rounded-xl border-b-4 text-xl font-bold transition active:border-b-0 active:translate-y-1 ${levelData.color.replace('bg-', 'hover:bg-').replace('border-', 'hover:border-')} bg-white border-gray-300`}
-                                    >
-                                        {opt}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                );
-            }
-
-            // 4. 成績單畫面
-            if (screen === 'report') {
-                return (
-                    <div className="min-h-screen bg-gray-50 p-8 flex flex-col items-center">
-                        <div className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-xl">
-                            <div className="flex justify-between items-center mb-6 border-b pb-4">
-                                <h2 className="text-3xl font-bold text-gray-800">冒險者檔案</h2>
-                                <button onClick={() => setScreen('map')} className="text-gray-500 hover:text-gray-800">關閉 ✕</button>
-                            </div>
-
-                            <div className="flex items-center gap-6 mb-8">
-                                <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-cyan-300 rounded-full flex items-center justify-center text-4xl text-white font-bold shadow-lg">
-                                    {userData.name[0]}
-                                </div>
-                                <div>
-                                    <div className="text-2xl font-bold">{userData.name}</div>
-                                    <div className="text-gray-500">目前等級：Lv. {userData.unlocked}</div>
-                                    <div className="text-yellow-600 font-bold mt-1">⭐ 金幣：{userData.coins}</div>
-                                </div>
-                            </div>
-
-                            <div className="mb-8">
-                                <h3 className="font-bold text-gray-700 mb-3">🏅 獲得徽章</h3>
-                                <div className="flex gap-2 flex-wrap">
-                                    {userData.badges.length === 0 ? <span className="text-gray-400 text-sm">尚未獲得任何徽章，加油！</span> :
-                                     userData.badges.map((b, i) => (
-                                        <span key={i} className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-bold border border-yellow-300">{b}</span>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <button onClick={submitToGAS} className="w-full py-3 bg-green-500 text-white rounded-xl font-bold text-lg hover:bg-green-600 shadow-md transition flex items-center justify-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                上傳學習記錄
-                            </button>
-                        </div>
-                    </div>
-                );
-            }
-
-            return <div>Loading...</div>;
-        }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+</script>
 </body>
 </html>
