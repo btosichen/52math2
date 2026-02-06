@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>分數冒險島：分數的計算</title>
+  <title>第 2 單元｜分數冒險島</title>
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -13,11 +13,13 @@
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
 
   <style>
-    body { font-family: 'Zen Maru Gothic', sans-serif; background-color: #ecfeff; }
-    .font-game { font-family: 'Fredoka', sans-serif; }
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      background: #e0f7fa;
+    }
   </style>
 </head>
 
@@ -25,13 +27,10 @@
 <div id="root"></div>
 
 <script type="text/babel">
+const { useState } = React;
 
-const { useState, useEffect } = React;
-
-/* ===============================
-   第 2 單元｜影片學習資料
-================================ */
-const VIDEO_LESSONS_UNIT2 = [
+/* ========= 影片資料 ========= */
+const VIDEO_LESSONS = [
   {
     title: "【概念】整數除以 2 與 整數乘以 1/2",
     url: "https://www.youtube.com/embed/UPUmjWD898k",
@@ -61,132 +60,77 @@ const VIDEO_LESSONS_UNIT2 = [
   }
 ];
 
-/* ===============================
-   影片學習站元件
-================================ */
-const VideoLearningStation = ({ videos, onLog }) => (
-  <div className="mt-12 space-y-8">
-    <h3 className="text-2xl font-bold text-blue-700 text-center">
-      🎬 整數與分數乘法運算影片學習
-    </h3>
+/* ========= 影片學習站 ========= */
+const VideoBlock = ({ data }) => {
+  const [answered, setAnswered] = useState(null);
 
-    {videos.map((v, i) => (
-      <div key={i} className="bg-white rounded-2xl p-4 shadow border">
-        <h4 className="font-bold mb-2">{v.title}</h4>
+  return (
+    <div className="bg-white rounded-2xl p-6 shadow space-y-4">
+      <h3 className="font-bold text-lg">{data.title}</h3>
 
+      {/* 影片容器：限制事件範圍 */}
+      <div className="relative w-full aspect-video rounded-lg overflow-hidden">
         <iframe
-          className="w-full aspect-video rounded-lg mb-4"
-          src={v.url}
+          className="absolute inset-0 w-full h-full"
+          src={data.url}
           allowFullScreen
-          onLoad={() => onLog("video_view", v.title)}
-        ></iframe>
+        />
+      </div>
 
-        <p className="font-bold mb-2">📝 小練習：{v.quiz.q}</p>
+      {/* 練習題（z-index 拉高，保證可點） */}
+      <div className="relative z-10">
+        <p className="font-bold mb-2">📝 小練習：{data.quiz.q}</p>
 
-        <div className="grid grid-cols-2 gap-2">
-          {v.quiz.options.map((opt, idx) => (
+        <div className="grid grid-cols-2 gap-3">
+          {data.quiz.options.map((opt, i) => (
             <button
-              key={idx}
-              className="bg-gray-100 hover:bg-blue-100 rounded-lg p-2"
-              onClick={() =>
-                onLog(
-                  "video_quiz",
-                  v.title,
-                  v.quiz.q,
-                  opt,
-                  opt === v.quiz.ans
-                )
-              }
+              key={i}
+              className={`py-2 rounded-xl border text-lg
+                ${answered === opt
+                  ? opt === data.quiz.ans
+                    ? "bg-green-200 border-green-400"
+                    : "bg-red-200 border-red-400"
+                  : "bg-gray-100 hover:bg-blue-100"}
+              `}
+              onClick={() => setAnswered(opt)}
             >
               {opt}
             </button>
           ))}
         </div>
-      </div>
-    ))}
-  </div>
-);
 
-/* ===============================
-   主程式
-================================ */
-function App() {
-  const [name, setName] = useState("");
-  const [started, setStarted] = useState(false);
-  const [gasUrl, setGasUrl] = useState(
-    localStorage.getItem("fractionAdventureGasUrl") ||
-    "https://script.google.com/macros/s/AKfycbxr4w817Y7RjYRDFVKJtJiAdpLZTqWmSpJBHtP-GJqPaqnHj_PKczSkkYJZtM6JJ1E/exec"
+        {answered && (
+          <div className="mt-3 font-bold">
+            {answered === data.quiz.ans
+              ? "✅ 答對了！"
+              : "❌ 再想想看～"}
+          </div>
+        )}
+      </div>
+    </div>
   );
+};
 
-  const logLearning = async (type, videoTitle, q="", ans="", correct="") => {
-    if (!gasUrl) return;
-
-    const payload = {
-      name,
-      unit: "第2單元 分數冒險島",
-      type,
-      video: videoTitle,
-      question: q,
-      answer: ans,
-      correct,
-      time: new Date().toLocaleString()
-    };
-
-    fetch(gasUrl, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-  };
-
-  if (!started) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="bg-white p-8 rounded-2xl shadow-xl text-center w-80">
-          <h1 className="text-3xl font-bold mb-4">🏝️ 分數冒險島</h1>
-          <input
-            className="border p-2 w-full mb-4 text-center"
-            placeholder="輸入冒險者姓名"
-            value={name}
-            onChange={e => setName(e.target.value)}
-          />
-          <button
-            className="bg-yellow-400 px-4 py-2 rounded-lg font-bold"
-            onClick={() => setStarted(true)}
-          >
-            開始學習
-          </button>
-
-          <input
-            className="border p-1 text-xs mt-4 w-full"
-            value={gasUrl}
-            onChange={e => {
-              setGasUrl(e.target.value);
-              localStorage.setItem("fractionAdventureGasUrl", e.target.value);
-            }}
-          />
-        </div>
-      </div>
-    );
-  }
-
+/* ========= 主畫面 ========= */
+function App() {
   return (
-    <div className="min-h-screen p-6 max-w-4xl mx-auto">
-      <h2 className="text-3xl font-bold mb-6 text-center">
+    <div className="max-w-5xl mx-auto p-6 space-y-8">
+      <h1 className="text-3xl font-bold text-center">
         第 2 單元｜分數冒險島
+      </h1>
+
+      <h2 className="text-xl font-bold text-blue-700 text-center">
+        🎬 整數與分數乘法運算影片學習
       </h2>
 
-      <VideoLearningStation
-        videos={VIDEO_LESSONS_UNIT2}
-        onLog={logLearning}
-      />
+      {VIDEO_LESSONS.map((v, i) => (
+        <VideoBlock key={i} data={v} />
+      ))}
     </div>
   );
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
-
 </script>
 </body>
 </html>
